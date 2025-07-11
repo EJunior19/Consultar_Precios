@@ -1,61 +1,54 @@
+const API_URL = "https://api.sheetbest.com/sheets/d2320623-59eb-42fb-88ff-5d9edce19c48";
 let productos = [];
 
-// Cargar datos desde la API de Sheetbest
-async function cargarProductos() {
+async function cargarDatos() {
   try {
-    const response = await fetch('https://api.sheetbest.com/sheets/d2320623-59eb-42fb-88ff-5d9edce19c48');
+    const response = await fetch(API_URL);
     productos = await response.json();
   } catch (error) {
-    console.error('Error al cargar productos:', error);
+    console.error("Error cargando los datos:", error);
   }
 }
 
-cargarProductos();
-
-// Buscar productos por nombre o código
 function buscarProducto() {
-  const input = document.getElementById('busqueda').value.toLowerCase();
-  const sugerencias = document.getElementById('sugerencias');
-  const detalle = document.getElementById('detalleProducto');
+  const input = document.getElementById("busqueda").value.toLowerCase();
+  const sugerencias = document.getElementById("sugerencias");
+  const detalle = document.getElementById("detalleProducto");
+  sugerencias.innerHTML = "";
+  detalle.style.display = "none";
 
-  sugerencias.innerHTML = '';
-  detalle.style.display = 'none';
+  if (input.length === 0) return;
 
-  if (!input) return;
-
-  const resultados = productos.filter(producto =>
-    producto.nombre.toLowerCase().includes(input) ||
-    producto.codigo.includes(input)
+  const coincidencias = productos.filter(p =>
+    p.codigo.toLowerCase().includes(input) || p.nombre.toLowerCase().includes(input)
   );
 
-  if (resultados.length === 0) {
-    sugerencias.innerHTML = '<div class="no-result">❗ No se encontraron coincidencias.</div>';
+  if (coincidencias.length === 0) {
+    sugerencias.innerHTML = `<div style="color:#ff4d4d; border: 1px solid red;">❗ No se encontraron coincidencias.</div>`;
     return;
   }
 
-  resultados.forEach(producto => {
-    const item = document.createElement('div');
-    item.className = 'item-sugerencia';
-    item.textContent = `${producto.codigo} - ${producto.nombre}`;
-    item.onclick = () => mostrarDetalle(producto);
+  coincidencias.forEach(p => {
+    const item = document.createElement("div");
+    item.textContent = `${p.codigo} - ${p.nombre}`;
+    item.onclick = () => mostrarDetalle(p);
     sugerencias.appendChild(item);
   });
 }
 
-// Mostrar los precios del producto seleccionado
 function mostrarDetalle(producto) {
-  const detalle = document.getElementById('detalleProducto');
-  detalle.style.display = 'block';
+  const detalle = document.getElementById("detalleProducto");
   detalle.innerHTML = `
-    <h2>🛒 ${producto.nombre}</h2>
+    <h2>${producto.nombre}</h2>
     <p><strong>Código:</strong> ${producto.codigo}</p>
     <p><strong>Contado:</strong> ${producto.contado}</p>
-    <p><strong>3x:</strong> ${producto['3x']}</p>
-    <p><strong>6x:</strong> ${producto['6x']}</p>
-    <p><strong>13x:</strong> ${producto['13x']}</p>
-    <p><strong>25x:</strong> ${producto['25x']}</p>
+    <p><strong>3x:</strong> ${producto["3x"]}</p>
+    <p><strong>6x:</strong> ${producto["6x"]}</p>
+    <p><strong>13x:</strong> ${producto["13x"]}</p>
+    <p><strong>25x:</strong> ${producto["25x"]}</p>
   `;
-
-  // Limpiar sugerencias
-  document.getElementById('sugerencias').innerHTML = '';
+  detalle.style.display = "block";
+  document.getElementById("sugerencias").innerHTML = "";
 }
+
+window.onload = cargarDatos;
