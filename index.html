@@ -12,12 +12,20 @@
       <h1>🔍 Consulta de Precios</h1>
 
       <label for="busqueda">Buscar producto:</label>
-      <input type="text" id="busqueda" placeholder="Nombre o código..." oninput="buscarProducto()" />
+      <input
+        type="text"
+        id="busqueda"
+        placeholder="Nombre o código..."
+        oninput="buscarProducto()"
+      />
+
       <div id="sugerencias" class="sugerencias"></div>
       <div id="detalleProducto" class="detalle-producto" style="display: none;"></div>
+
+      <h2>🛒 Carrito</h2>
+      <div id="carrito" class="carrito-vacio">No hay productos aún.</div>
     </div>
   </main>
   <script src="ventas.js"></script>
 </body>
 </html>
-

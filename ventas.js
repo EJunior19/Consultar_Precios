@@ -1,6 +1,7 @@
 const API_URL = 'https://api.sheetbest.com/sheets/d2320623-59eb-42fb-88ff-5d9edce19c48';
 
 let productos = [];
+let carrito = [];
 
 fetch(API_URL)
   .then(response => response.json())
@@ -15,6 +16,7 @@ function buscarProducto() {
   const detalle = document.getElementById('detalleProducto');
 
   sugerencias.innerHTML = '';
+  detalle.classList.remove('mostrar');
   detalle.style.display = 'none';
 
   if (valor.length === 0) return;
@@ -31,15 +33,22 @@ function buscarProducto() {
 
   resultados.forEach(producto => {
     const item = document.createElement('div');
-    item.textContent = `${producto.codigo} - ${producto.nombre}`;
-    item.onclick = () => mostrarDetalle(producto);
+    item.classList.add('sugerencia-item');
+
+    const nombre = `${producto.codigo} - ${producto.nombre}`;
+    item.innerHTML = `
+      <span>${nombre}</span>
+      <button style="margin-left: 10px;" onclick='agregarAlCarrito(${JSON.stringify(JSON.stringify(producto))})'>🛒</button>
+    `;
+    item.onclick = () => {
+      mostrarDetalle(producto);
+    };
     sugerencias.appendChild(item);
   });
 }
 
 function mostrarDetalle(producto) {
   const detalle = document.getElementById('detalleProducto');
-  detalle.style.display = 'block';
   detalle.innerHTML = `
     <h3>${producto.nombre}</h3>
     <p><strong>Código:</strong> ${producto.codigo}</p>
@@ -49,4 +58,36 @@ function mostrarDetalle(producto) {
     <p><strong>13x:</strong> ${producto["13x"]}</p>
     <p><strong>25x:</strong> ${producto["25x"]}</p>
   `;
+  detalle.style.display = 'block';
+  detalle.classList.add('mostrar');
+}
+
+function agregarAlCarrito(productoStr) {
+  const producto = JSON.parse(productoStr);
+  carrito.push(producto);
+  renderizarCarrito();
+}
+
+function renderizarCarrito() {
+  const carritoDiv = document.getElementById('carrito');
+  if (carrito.length === 0) {
+    carritoDiv.innerHTML = 'No hay productos aún.';
+    return;
+  }
+
+  carritoDiv.innerHTML = '';
+  carrito.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'carrito-item';
+    div.innerHTML = `
+      <span>${item.codigo} - ${item.nombre}</span>
+      <button onclick="eliminarDelCarrito(${index})">❌</button>
+    `;
+    carritoDiv.appendChild(div);
+  });
+}
+
+function eliminarDelCarrito(index) {
+  carrito.splice(index, 1);
+  renderizarCarrito();
 }
