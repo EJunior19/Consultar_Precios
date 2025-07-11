@@ -38,11 +38,13 @@ function buscarProducto() {
     const nombre = `${producto.codigo} - ${producto.nombre}`;
     item.innerHTML = `
       <span>${nombre}</span>
-      <button style="margin-left: 10px;" onclick='agregarAlCarrito(${JSON.stringify(JSON.stringify(producto))})'>🛒</button>
+      <button onclick='agregarAlCarrito(${JSON.stringify(JSON.stringify(producto))})'>🛒</button>
     `;
-    item.onclick = () => {
+
+    item.querySelector('span').onclick = () => {
       mostrarDetalle(producto);
     };
+
     sugerencias.appendChild(item);
   });
 }
