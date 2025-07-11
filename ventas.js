@@ -7,6 +7,7 @@ fetch(API_URL)
   .then(response => response.json())
   .then(data => {
     productos = data;
+    document.getElementById('busqueda').disabled = false;
   });
 
 function buscarProducto() {
@@ -21,10 +22,16 @@ function buscarProducto() {
 
   if (valor.length === 0) return;
 
-  const resultados = productos.filter(p =>
-    p.codigo.toLowerCase().includes(valor) || 
-    p.nombre.toLowerCase().includes(valor)
-  );
+  const resultados = productos
+    .filter(p =>
+      p.codigo.toLowerCase().includes(valor) ||
+      p.nombre.toLowerCase().includes(valor)
+    )
+    .sort((a, b) => {
+      const aStarts = a.nombre.toLowerCase().startsWith(valor) ? -1 : 1;
+      const bStarts = b.nombre.toLowerCase().startsWith(valor) ? -1 : 1;
+      return aStarts - bStarts;
+    });
 
   if (resultados.length === 0) {
     sugerencias.innerHTML = `<div style="color: #ff5252; border: 1px solid #ff5252;">❗ No se encontraron coincidencias.</div>`;
@@ -36,12 +43,10 @@ function buscarProducto() {
     item.classList.add('sugerencia-item');
 
     const nombre = `${producto.codigo} - ${producto.nombre}`;
-    item.innerHTML = `
-      <span>${nombre}</span>
-      <button onclick='agregarAlCarrito(${JSON.stringify(JSON.stringify(producto))})'>🛒</button>
-    `;
+    item.innerHTML = `<span>${nombre}</span>`;
 
     item.querySelector('span').onclick = () => {
+      sugerencias.innerHTML = '';
       mostrarDetalle(producto);
     };
 
@@ -59,15 +64,21 @@ function mostrarDetalle(producto) {
     <p><strong>6x:</strong> ${producto["6x"]}</p>
     <p><strong>13x:</strong> ${producto["13x"]}</p>
     <p><strong>25x:</strong> ${producto["25x"]}</p>
+    <div class="btn-derecha">
+      <button onclick='agregarAlCarritoDesdeDetalle(${JSON.stringify(JSON.stringify(producto))})'>🛒 Agregar al carrito</button>
+    </div>
   `;
   detalle.style.display = 'block';
   detalle.classList.add('mostrar');
 }
 
-function agregarAlCarrito(productoStr) {
+function agregarAlCarritoDesdeDetalle(productoStr) {
   const producto = JSON.parse(productoStr);
-  carrito.push(producto);
-  renderizarCarrito();
+  const yaExiste = carrito.some(p => p.codigo === producto.codigo);
+  if (!yaExiste) {
+    carrito.push(producto);
+    renderizarCarrito();
+  }
 }
 
 function renderizarCarrito() {
@@ -78,7 +89,12 @@ function renderizarCarrito() {
   }
 
   carritoDiv.innerHTML = '';
+  let total = 0;
+
   carrito.forEach((item, index) => {
+    const precio = parseFloat(item.contado.replace(/\./g, '').replace(',', '.')) || 0;
+    total += precio;
+
     const div = document.createElement('div');
     div.className = 'carrito-item';
     div.innerHTML = `
@@ -87,6 +103,11 @@ function renderizarCarrito() {
     `;
     carritoDiv.appendChild(div);
   });
+
+  const totalDiv = document.createElement('div');
+  totalDiv.style.marginTop = '1rem';
+  totalDiv.innerHTML = `<strong>Total contado:</strong> ₲ ${total.toLocaleString('es-PY')}`;
+  carritoDiv.appendChild(totalDiv);
 }
 
 function eliminarDelCarrito(index) {
