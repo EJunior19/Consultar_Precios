@@ -1,0 +1,23 @@
+<!-- index.html - Buscador de productos simplificado -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Precios</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Consulta de Precios</h1>
+
+    <label for="busqueda">Buscar producto:</label>
+    <input type="text" id="busqueda" placeholder="Nombre o código..." oninput="buscarProducto()" />
+    <div id="sugerencias" class="sugerencias"></div>
+
+    <div id="detalleProducto" class="detalle-producto" style="display: none;"></div>
+  </div>
+
+  <script src="ventas.js"></script>
+</body>
+</html>
