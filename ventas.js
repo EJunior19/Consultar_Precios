@@ -3,6 +3,15 @@ const API_URL = 'https://api.sheetbest.com/sheets/d2320623-59eb-42fb-88ff-5d9edc
 let productos = [];
 let carrito = [];
 
+// Normaliza texto: minúsculas + sin acentos
+function normalizarTexto(texto) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+// Carga inicial de productos
 fetch(API_URL)
   .then(response => response.json())
   .then(data => {
@@ -10,9 +19,10 @@ fetch(API_URL)
     document.getElementById('busqueda').disabled = false;
   });
 
+// Búsqueda inteligente y flexible
 function buscarProducto() {
   const input = document.getElementById('busqueda');
-  const valor = input.value.toLowerCase();
+  const valor = normalizarTexto(input.value);
   const sugerencias = document.getElementById('sugerencias');
   const detalle = document.getElementById('detalleProducto');
 
@@ -23,13 +33,16 @@ function buscarProducto() {
   if (valor.length === 0) return;
 
   const resultados = productos
-    .filter(p =>
-      p.codigo.toLowerCase().includes(valor) ||
-      p.nombre.toLowerCase().includes(valor)
-    )
+    .filter(p => {
+      const nombre = normalizarTexto(p.nombre);
+      const codigo = normalizarTexto(p.codigo);
+      return nombre.includes(valor) || codigo.includes(valor);
+    })
     .sort((a, b) => {
-      const aStarts = a.nombre.toLowerCase().startsWith(valor) ? -1 : 1;
-      const bStarts = b.nombre.toLowerCase().startsWith(valor) ? -1 : 1;
+      const aNombre = normalizarTexto(a.nombre);
+      const bNombre = normalizarTexto(b.nombre);
+      const aStarts = aNombre.startsWith(valor) ? -1 : 1;
+      const bStarts = bNombre.startsWith(valor) ? -1 : 1;
       return aStarts - bStarts;
     });
 
@@ -54,6 +67,7 @@ function buscarProducto() {
   });
 }
 
+// Muestra el detalle con precios
 function mostrarDetalle(producto) {
   const detalle = document.getElementById('detalleProducto');
   detalle.innerHTML = `
@@ -73,6 +87,7 @@ function mostrarDetalle(producto) {
   detalle.classList.add('mostrar');
 }
 
+// Agrega al carrito
 function agregarAlCarritoDesdeDetalle(productoStr) {
   const producto = JSON.parse(productoStr);
   const yaExiste = carrito.some(p => p.codigo === producto.codigo);
@@ -82,6 +97,7 @@ function agregarAlCarritoDesdeDetalle(productoStr) {
   }
 }
 
+// Muestra el contenido del carrito
 function renderizarCarrito() {
   const carritoDiv = document.getElementById('carrito');
   if (carrito.length === 0) {
@@ -111,7 +127,9 @@ function renderizarCarrito() {
   carritoDiv.appendChild(totalDiv);
 }
 
+// Elimina producto del carrito
 function eliminarDelCarrito(index) {
   carrito.splice(index, 1);
   renderizarCarrito();
 }
+
