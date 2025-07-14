@@ -64,6 +64,7 @@ function mostrarDetalle(producto) {
     <p><strong>6x:</strong> ${producto["6x"]}</p>
     <p><strong>13x:</strong> ${producto["13x"]}</p>
     <p><strong>25x:</strong> ${producto["25x"]}</p>
+    <p><strong>30x:</strong> ${producto["30x"]}</p>
     <div class="btn-derecha">
       <button onclick='agregarAlCarritoDesdeDetalle(${JSON.stringify(JSON.stringify(producto))})'>🛒 Agregar al carrito</button>
     </div>
