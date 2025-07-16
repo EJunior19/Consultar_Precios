@@ -187,3 +187,37 @@ async function exportarCarritoPDF() {
 
   doc.save(`${nombreArchivo}.pdf`);
 }
+
+function enviarCarritoWhatsApp() {
+  if (carrito.length === 0) {
+    alert("El carrito está vacío.");
+    return;
+  }
+
+  const numero = "595984784509";
+
+  let mensaje = "*🛒 Cotización de productos:*\n\n";
+  let total = 0;
+
+  carrito.forEach((item, index) => {
+    mensaje += `${index + 1}. ${item.codigo} - ${item.nombre}\n`;
+    if (item.contado) mensaje += `   Contado: ₲ ${item.contado}\n`;
+
+    let cuotas = ["3x", "6x", "13x", "25x", "30x"];
+    cuotas.forEach(cuota => {
+      if (item[cuota]) {
+        mensaje += `   ${cuota}: ${item[cuota]}\n`;
+      }
+    });
+
+    mensaje += "\n";
+
+    const precio = parseFloat(item.contado?.replace(/\./g, '').replace(',', '.')) || 0;
+    total += precio;
+  });
+
+  mensaje += `*Total contado:* ₲ ${total.toLocaleString('es-PY')}\n`;
+
+  const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+  window.open(url, '_blank');
+}

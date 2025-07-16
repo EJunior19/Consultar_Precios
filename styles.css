@@ -131,11 +131,13 @@ input[type="text"]::placeholder {
 
 .btn-derecha {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
   margin-top: 1rem;
 }
 
 .btn-derecha button {
+  flex: 1;
   background: #00e676;
   border: none;
   padding: 0.6rem 1rem;
@@ -161,5 +163,9 @@ input[type="text"]::placeholder {
 
   input[type="text"] {
     font-size: 1rem;
+  }
+
+  .btn-derecha {
+    flex-direction: column;
   }
 }
