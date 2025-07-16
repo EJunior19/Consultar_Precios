@@ -3,7 +3,6 @@ const API_URL = 'https://api.sheetbest.com/sheets/d2320623-59eb-42fb-88ff-5d9edc
 let productos = [];
 let carrito = [];
 
-// Normaliza texto: minúsculas + sin acentos
 function normalizarTexto(texto) {
   return texto
     .toLowerCase()
@@ -11,7 +10,6 @@ function normalizarTexto(texto) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-// Carga inicial de productos
 fetch(API_URL)
   .then(response => response.json())
   .then(data => {
@@ -19,7 +17,6 @@ fetch(API_URL)
     document.getElementById('busqueda').disabled = false;
   });
 
-// Búsqueda inteligente y flexible
 function buscarProducto() {
   const input = document.getElementById('busqueda');
   const valor = normalizarTexto(input.value);
@@ -47,7 +44,7 @@ function buscarProducto() {
     });
 
   if (resultados.length === 0) {
-    sugerencias.innerHTML = `<div style="color: #ff5252; border: 1px solid #ff5252;">❗ No se encontraron coincidencias.</div>`;
+    sugerencias.innerHTML = '<div style="color: #ff5252; border: 1px solid #ff5252;">❗ No se encontraron coincidencias.</div>';
     return;
   }
 
@@ -67,7 +64,12 @@ function buscarProducto() {
   });
 }
 
-// Muestra el detalle con precios (solo si existen)
+function mostrarPrecio(label, valor) {
+  return valor && valor.trim() !== "" && valor.toLowerCase() !== "null"
+    ? `<p><strong>${label}:</strong> ${valor}</p>`
+    : "";
+}
+
 function mostrarDetalle(producto) {
   const detalle = document.getElementById('detalleProducto');
 
@@ -90,14 +92,6 @@ function mostrarDetalle(producto) {
   detalle.classList.add('mostrar');
 }
 
-// Muestra línea solo si hay valor válido
-function mostrarPrecio(label, valor) {
-  return valor && valor.trim() !== "" && valor.toLowerCase() !== "null"
-    ? `<p><strong>${label}:</strong> ${valor}</p>`
-    : "";
-}
-
-// Agrega al carrito
 function agregarAlCarritoDesdeDetalle(productoStr) {
   const producto = JSON.parse(productoStr);
   const yaExiste = carrito.some(p => p.codigo === producto.codigo);
@@ -107,7 +101,6 @@ function agregarAlCarritoDesdeDetalle(productoStr) {
   }
 }
 
-// Muestra el contenido del carrito
 function renderizarCarrito() {
   const carritoDiv = document.getElementById('carrito');
   if (carrito.length === 0) {
@@ -137,10 +130,60 @@ function renderizarCarrito() {
   carritoDiv.appendChild(totalDiv);
 }
 
-// Elimina producto del carrito
 function eliminarDelCarrito(index) {
   carrito.splice(index, 1);
   renderizarCarrito();
 }
 
+async function exportarCarritoPDF() {
+  if (carrito.length === 0) {
+    alert("El carrito está vacío.");
+    return;
+  }
 
+  const nombreArchivo = prompt("📄 Ingresá el nombre para el archivo PDF:", "carrito");
+  if (!nombreArchivo) return;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Resumen de Carrito", 20, 20);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+
+  let y = 30;
+  let total = 0;
+
+  carrito.forEach((item, index) => {
+    const precio = parseFloat(item.contado?.replace(/\./g, '').replace(',', '.')) || 0;
+    total += precio;
+    doc.text(`${index + 1}. ${item.codigo} - ${item.nombre}`, 20, y);
+    doc.text(`Contado: ₲ ${item.contado}`, 25, y + 7);
+
+    let cuotas = ["3x", "6x", "13x", "25x", "30x"];
+    let textoCuotas = cuotas
+      .map(cuota => item[cuota] ? `${cuota}: ${item[cuota]}` : "")
+      .filter(Boolean)
+      .join("  |  ");
+
+    if (textoCuotas) {
+      doc.text(textoCuotas, 25, y + 14);
+      y += 22;
+    } else {
+      y += 14;
+    }
+
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total contado: ₲ ${total.toLocaleString('es-PY')}`, 20, y + 10);
+
+  doc.save(`${nombreArchivo}.pdf`);
+}
