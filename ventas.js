@@ -4,7 +4,7 @@ let productos = [];
 let carrito = [];
 
 function normalizarTexto(texto) {
-  return texto
+  return String(texto)
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
@@ -19,7 +19,7 @@ fetch(API_URL)
 
 function buscarProducto() {
   const input = document.getElementById('busqueda');
-  const valor = normalizarTexto(input.value);
+  const valor = normalizarTexto(String(input.value || ""));
   const sugerencias = document.getElementById('sugerencias');
   const detalle = document.getElementById('detalleProducto');
 
@@ -31,13 +31,13 @@ function buscarProducto() {
 
   const resultados = productos
     .filter(p => {
-      const nombre = normalizarTexto(p.nombre);
-      const codigo = normalizarTexto(p.codigo);
+      const nombre = normalizarTexto(String(p.nombre || ""));
+      const codigo = normalizarTexto(String(p.codigo || ""));
       return nombre.includes(valor) || codigo.includes(valor);
     })
     .sort((a, b) => {
-      const aNombre = normalizarTexto(a.nombre);
-      const bNombre = normalizarTexto(b.nombre);
+      const aNombre = normalizarTexto(String(a.nombre || ""));
+      const bNombre = normalizarTexto(String(b.nombre || ""));
       const aStarts = aNombre.startsWith(valor) ? -1 : 1;
       const bStarts = bNombre.startsWith(valor) ? -1 : 1;
       return aStarts - bStarts;
@@ -112,7 +112,7 @@ function renderizarCarrito() {
   let total = 0;
 
   carrito.forEach((item, index) => {
-    const precio = parseFloat(item.contado?.replace(/\./g, '').replace(',', '.')) || 0;
+    const precio = parseFloat(String(item.contado)?.replace(/\./g, '').replace(',', '.')) || 0;
     total += precio;
 
     const div = document.createElement('div');
@@ -158,7 +158,7 @@ async function exportarCarritoPDF() {
   let total = 0;
 
   carrito.forEach((item, index) => {
-    const precio = parseFloat(item.contado?.replace(/\./g, '').replace(',', '.')) || 0;
+    const precio = parseFloat(String(item.contado)?.replace(/\./g, '').replace(',', '.')) || 0;
     total += precio;
     doc.text(`${index + 1}. ${item.codigo} - ${item.nombre}`, 20, y);
     doc.text(`Contado: ₲ ${item.contado}`, 25, y + 7);
@@ -212,7 +212,7 @@ function enviarCarritoWhatsApp() {
 
     mensaje += "\n";
 
-    const precio = parseFloat(item.contado?.replace(/\./g, '').replace(',', '.')) || 0;
+    const precio = parseFloat(String(item.contado)?.replace(/\./g, '').replace(',', '.')) || 0;
     total += precio;
   });
 
