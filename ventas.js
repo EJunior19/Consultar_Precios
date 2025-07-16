@@ -67,24 +67,34 @@ function buscarProducto() {
   });
 }
 
-// Muestra el detalle con precios
+// Muestra el detalle con precios (solo si existen)
 function mostrarDetalle(producto) {
   const detalle = document.getElementById('detalleProducto');
-  detalle.innerHTML = `
+
+  let html = `
     <h3>${producto.nombre}</h3>
     <p><strong>Código:</strong> ${producto.codigo}</p>
-    <p><strong>Contado:</strong> ${producto.contado}</p>
-    <p><strong>3x:</strong> ${producto["3x"]}</p>
-    <p><strong>6x:</strong> ${producto["6x"]}</p>
-    <p><strong>13x:</strong> ${producto["13x"]}</p>
-    <p><strong>25x:</strong> ${producto["25x"]}</p>
-    <p><strong>30x:</strong> ${producto["30x"]}</p>
+    ${mostrarPrecio("Contado", producto.contado)}
+    ${mostrarPrecio("3x", producto["3x"])}
+    ${mostrarPrecio("6x", producto["6x"])}
+    ${mostrarPrecio("13x", producto["13x"])}
+    ${mostrarPrecio("25x", producto["25x"])}
+    ${mostrarPrecio("30x", producto["30x"])}
     <div class="btn-derecha">
       <button onclick='agregarAlCarritoDesdeDetalle(${JSON.stringify(JSON.stringify(producto))})'>🛒 Agregar al carrito</button>
     </div>
   `;
+
+  detalle.innerHTML = html;
   detalle.style.display = 'block';
   detalle.classList.add('mostrar');
+}
+
+// Muestra línea solo si hay valor válido
+function mostrarPrecio(label, valor) {
+  return valor && valor.trim() !== "" && valor.toLowerCase() !== "null"
+    ? `<p><strong>${label}:</strong> ${valor}</p>`
+    : "";
 }
 
 // Agrega al carrito
@@ -109,7 +119,7 @@ function renderizarCarrito() {
   let total = 0;
 
   carrito.forEach((item, index) => {
-    const precio = parseFloat(item.contado.replace(/\./g, '').replace(',', '.')) || 0;
+    const precio = parseFloat(item.contado?.replace(/\./g, '').replace(',', '.')) || 0;
     total += precio;
 
     const div = document.createElement('div');
@@ -132,4 +142,5 @@ function eliminarDelCarrito(index) {
   carrito.splice(index, 1);
   renderizarCarrito();
 }
+
 
