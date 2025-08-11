@@ -1,4 +1,4 @@
-const API_URL = 'https://api.sheetbest.com/sheets/d2320623-59eb-42fb-88ff-5d9edce19c48';
+const API_URL = 'https://api.sheetbest.com/sheets/b0bca9af-b167-43b6-b4b5-afbfcacf9013';
 
 let productos = [];
 let carrito = [];
